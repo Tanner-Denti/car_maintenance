@@ -7,17 +7,22 @@ const style = {
     row: `flex`,
     text: `ml-2 cursor-pointer`,
     textComplete: `ml-2 cursor-pointer line-through`,
-    button: `cursor-pointer flex items-center`
-}
+    button: `cursor-pointer flex items-center`,
+  };
 
-const Task = ({task}) => {
+const Task = ({ task, toggleComplete, deleteTask }) => {
     return (
-        <li className={style.li}>
+        <li className={task.completed ? style.liComplete : style.li}>
             <div className={style.row}>
-                <input type='checkbox'/>
-                <p className={style.text}>{task.text}</p>
+                <input 
+                    onChange={() => toggleComplete(task)} 
+                    type='checkbox' 
+                    checked={task.completed ? 'checked' : ''}/>
+                <p onClick={() => toggleComplete(task)} className={task.completed ? style.textComplete : style.text}>
+                    {task.text}
+                </p>
             </div>
-            <button>{<FaRegTrashAlt/>}</button>
+            <button onClick={() => deleteTask(task.id)}>{<FaRegTrashAlt/>}</button>
         </li>
     )
 }

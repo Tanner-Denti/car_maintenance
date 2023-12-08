@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { FaPlus } from "react-icons/fa";
 import Task from './components/task';
 import { db } from './firebase';
-import { query, collection, onSnapshot } from 'firebase/firestore'
+import { query, collection, onSnapshot, updateDoc, doc, addDoc, deleteDoc} from 'firebase/firestore'
 
 const style = {
   bg: `h-screen w-screen p-4 bg-gradient-to-r from-[#ffdec7] to-[#fff6f0]`,
@@ -17,6 +17,21 @@ const style = {
 
 function App() {
   const [tasks, setTasks] = useState([])
+  const [input, setInput] = useState('')
+
+  const createTask = async (e) => {
+    e.preventDefault(e)
+    if(input === '')
+    {
+      alert('Please enter a valid task')
+      return
+    }
+    await addDoc(collection(db, 'tasks'), {
+      text: input,
+      completed: false
+    })
+    setInput('')
+  }
 
   useEffect(() => {
     const q = query(collection(db, 'tasks'));
@@ -30,22 +45,41 @@ function App() {
     return () => unsubscribe()
   }, [])
 
+  const toggleComplete = async (task) => {
+    await updateDoc(doc(db, 'tasks', task.id), {
+      completed: !task.completed
+    })
+  }
 
+  const deleteTask = async (id) => {
+    await deleteDoc(doc(db, 'tasks', id))
+  }
 
   return (
     <div className={style.bg}>
       <div className={style.container}>
         <h3 className={style.heading}>Car Maintenance</h3>
-        <form className={style.form}>
-          <input className={style.input} type="text" placeholder="Enter New Task"></input>
+        <form onSubmit={createTask} className={style.form}>
+          <input 
+            value={input} 
+            onChange={(e) => setInput(e.target.value)} 
+            className={style.input} 
+            type="text" 
+            placeholder="Enter New Task"
+          />
           <button className={style.button}><FaPlus size={30}/></button>
         </form>
         <ul>
           {tasks.map((task, index) => (
-            <Task key={index} task={task}/>
+            <Task 
+              key={index} 
+              task={task} 
+              toggleComplete={toggleComplete}
+              deleteTask={deleteTask}
+            />
           ))}
         </ul>
-        <p className={style.count}>You have two tasks</p>
+        {tasks.length < 1 ? null : <p className={style.count}>{`You have ${tasks.length} tasks`}</p>}
       </div>
     </div>
   );
