@@ -57,7 +57,7 @@ const Task = () => {
 
   return (
     <div className={style.container}>
-        <h3 className={style.heading}>Car Maintenance</h3>
+        <h3 className={style.heading}>Car Maintenance Tasks</h3>
         <form onSubmit={createTaskItem} className={style.form}>
             <input 
                 value={input} 
@@ -72,9 +72,9 @@ const Task = () => {
             {taskItems.map((taskItem, index) => (
             <TaskItem 
                 key={index} 
-                task={taskItem} 
+                taskItem={taskItem} 
                 toggleComplete={toggleComplete}
-                deleteTask={deleteTaskItem}
+                deleteTaskItem={deleteTaskItem}
             />
             ))}
         </ul>
