@@ -1,18 +1,22 @@
 import React from 'react';
+import {FaRegTrashAlt} from 'react-icons/fa'
 
 const style = {
-  card: `bg-white p-4 rounded-lg shadow-md mb-4`,
+  card: `flex justify-between bg-slate-200 p-4 my-2 capitalize`,
   title: `text-lg font-semibold`,
-  detail: `text-sm`
+  detail: `text-sm`,
+  button: `cursor-pointer flex items-center`,
+  row: `flex`
 };
 
-const VehicleCard = ({ vehicle }) => {
+const VehicleCard = ({ vehicle, deleteVehicle}) => {
   return (
-    <div className={style.card}>
-      <div className={style.title}>{vehicle.make} {vehicle.model}</div>
-      <div className={style.detail}>Year: {vehicle.year}</div>
-      {/* Add more vehicle details here as needed */}
-    </div>
+    <li className={style.card}>
+        <div className={style.row}>
+            <div className={style.title}>{vehicle.make} {vehicle.model} {vehicle.year}</div>
+        </div>
+        <button className={style.button} onClick={() => deleteVehicle(vehicle.id)}>{<FaRegTrashAlt/>}</button>
+    </li>
   );
 };
 
