@@ -7,7 +7,7 @@ const style = {
   heading: `text-6xl font-bold p-2`,
   content: `max-w-[290px] text-left p-[15px] mb-[10px] font-semibold text-lg`,
   button: `ml-[-15px] bg-purple-500 text-white text-xl font-semibold rounded w-[250px] h-[75px]`,
-  image: `h-[400px] mt-[175px]`
+  image: `h-[200px] mt-[175px]`
 };
 
 const Home = () => {

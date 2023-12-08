@@ -3,7 +3,9 @@ import { useState, useEffect } from 'react';
 import { FaPlus } from "react-icons/fa";
 import TaskItem from './TaskItem';
 import { db } from '../firebase';
-import { query, collection, onSnapshot, updateDoc, doc, addDoc, deleteDoc, getDocs} from 'firebase/firestore';
+import { query, collection, onSnapshot, updateDoc, doc, addDoc, deleteDoc, getDocs, where} from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import { useAuth } from './AuthContext';
 
 const style = {
   container: `bg-slate-100 max-w-[75%] w-full mx-auto min-h-screen rounded-md shadow-xl flex pt-10 justify-center`,
@@ -21,6 +23,7 @@ const Task = () => {
   const [input, setInput] = useState('')
   const [selectedVehicleId, setSelectedVehicleId] = useState('');
   const [vehicles, setVehicles] = useState([]);
+  const { user } = useAuth();
 
   const createTaskItem = async (e) => {
     e.preventDefault(e)
@@ -29,18 +32,24 @@ const Task = () => {
       alert('Please enter a valid task')
       return
     }
+    const auth = getAuth();
+    const userId = auth.currentUser.uid;
     await addDoc(collection(db, 'taskItems'), {
       text: input,
       completed: false,
-      vehicleId: selectedVehicleId
+      vehicleId: selectedVehicleId,
+      userId
     })
     setInput('')
   }
 
   useEffect(() => {
+    if (!user) return;
+  
     const fetchVehicles = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, 'vehicles'));
+        const q = query(collection(db, 'vehicles'), where('userId', '==', user.uid));
+        const querySnapshot = await getDocs(q);
         const vehiclesArray = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
@@ -50,19 +59,19 @@ const Task = () => {
         console.error("Error fetching vehicles:", error);
       }
     };
-
-    const q = query(collection(db, 'taskItems'));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+  
+    const taskQuery = query(collection(db, 'taskItems'), where('userId', '==', user.uid));
+    const unsubscribe = onSnapshot(taskQuery, (querySnapshot) => {
       let taskItemsArr = [];
       querySnapshot.forEach((doc) => {
-        taskItemsArr.push({...doc.data(), id: doc.id})
+        taskItemsArr.push({...doc.data(), id: doc.id});
       });
-      setTaskItems(taskItemsArr)
+      setTaskItems(taskItemsArr);
     });
-
-    fetchVehicles()
-    return () => unsubscribe()
-  }, [])
+  
+    fetchVehicles();
+    return () => unsubscribe();
+  }, [user]);
 
   const toggleComplete = async (taskItem) => {
     await updateDoc(doc(db, 'taskItems', taskItem.id), {

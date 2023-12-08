@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@layer base {
+    body {
+      @apply min-h-screen bg-gradient-to-r from-[#ffdec7] to-[#fff6f0];
+    }
+  }

@@ -1,7 +1,9 @@
 import React, { useState, useEffect} from 'react';
-import { collection, addDoc, deleteDoc, query, onSnapshot, doc } from 'firebase/firestore';
+import { collection, addDoc, deleteDoc, query, onSnapshot, doc, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import VehicleCard from './VehicleCard';
+import { getAuth } from 'firebase/auth';
+import { useAuth } from './AuthContext';
 
 const style = {
     container: `bg-slate-100 max-w-[75%] w-full mx-auto min-h-screen rounded-md shadow-xl flex pt-10`,
@@ -19,6 +21,7 @@ const NewCars = () => {
   const [model, setModel] = useState('');
   const [year, setYear] = useState('');
   const [vehicles, setVehicles] = useState([]);
+  const { user } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,7 +32,9 @@ const NewCars = () => {
     }
 
     try {
-      await addDoc(collection(db, 'vehicles'), { make, model, year });
+      const auth = getAuth();
+      const userId = auth.currentUser.uid;
+      await addDoc(collection(db, 'vehicles'), { make, model, year, userId });
       setMake('');
       setModel('');
       setYear('');
@@ -40,16 +45,19 @@ const NewCars = () => {
   };
 
   useEffect(() => {
-    const q = query(collection(db, 'vehicles'));
-    const updateVehicles = onSnapshot(q, (querySnapshot) => {
+    if (!user) return; // Ensure user is logged in
+    const q = query(collection(db, 'vehicles'), where('userId', '==', user.uid));
+  
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
       let vehiclesArr = [];
       querySnapshot.forEach((doc) => {
-        vehiclesArr.push({...doc.data(), id: doc.id})
+        vehiclesArr.push({...doc.data(), id: doc.id});
       });
-      setVehicles(vehiclesArr)
+      setVehicles(vehiclesArr);
     });
-    return () => updateVehicles()
-  }, [])
+  
+    return () => unsubscribe();
+  }, [user]);
 
   const deleteVehicle = async (id) => {
     await deleteDoc(doc(db, 'vehicles', id))
