@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from './AuthContext';
 
 const style = {
   nav: `bg-gray-800 text-white flex justify-center items-center p-4`,
@@ -11,6 +12,17 @@ const style = {
 };
 
 const NavBar = () => {
+  const { user, logOut, googleSignIn } = useAuth();
+
+  const handleSignOut = async () => {
+    try {
+      await logOut();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+
   return (
     <nav className={style.nav}>
       <div className={style.navContent}>
@@ -20,11 +32,20 @@ const NavBar = () => {
 
         <div className={style.navLinks}>
           <Link to="/" className={style.navLink}>Home</Link>
-          <Link to="/new-cars" className={style.navLink}>New Cars</Link>
-          <Link to="/tasks" className={style.navLink}>Tasks</Link>
+
+          {user && (
+            <>
+              <Link to="/new-cars" className={style.navLink}>New Cars</Link>
+              <Link to="/tasks" className={style.navLink}>Tasks</Link>
+            </>
+          )}
         </div>
 
-        <span className={style.userName}>Log In</span>
+        {user ? (
+          <button onClick={handleSignOut}>Logout</button>
+        ) : (
+          <button onClick={googleSignIn}>Log In</button>
+        )}
       </div>
     </nav>
   );

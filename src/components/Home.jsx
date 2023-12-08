@@ -1,4 +1,5 @@
 import React from 'react';
+import { useAuth } from './AuthContext';
 
 const style = {
   container: `bg-slate-100 max-w-[75%] w-full mx-auto min-h-screen rounded-md shadow-xl flex pt-10`,
@@ -10,12 +11,16 @@ const style = {
 };
 
 const Home = () => {
+  const { user, googleSignIn } = useAuth();
+
   return (
     <div className={style.container}>
       <div className={style.contentBox}>
         <h1 className={style.heading}>About Us</h1>
         <p className={style.content}>This platform is a fun place to allow users to keep track of their vehicle information and maintenance. We offer the ability to track your vehicle information, and create and complete tasks related to car maintenance.</p>
-        <button className={style.button}>Create Account</button>
+        {!user && (
+        <button onClick={googleSignIn} className={style.button}>Sign in with Google</button>
+      )}
       </div>
       <img src="/home_image.png" alt="Car maintenance" className={style.image}/>
     </div>
